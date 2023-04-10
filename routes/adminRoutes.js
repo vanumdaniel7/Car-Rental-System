@@ -29,6 +29,7 @@ router.post("/login", async (req, res) => {
             });
         }
     } catch(err) {
+        console.log(err);
         res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
@@ -43,6 +44,7 @@ router.get("/inventory", auth.requireAdminAuthentication, async (req, res) => {
         const result = await db.getCarData(availablity);
         res.json(result);
     } catch(err) {
+        console.log(err);
         res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
@@ -57,6 +59,7 @@ router.delete("/:numberPlate/sell", auth.requireAdminAuthentication, async (req,
         const result = await db.deleteInventoryItem(numberPlate);
         res.json(result);
     } catch(err) {
+        console.log(err);
         res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
@@ -71,6 +74,7 @@ router.patch("/:numberPlate/repair", auth.requireAdminAuthentication, async (req
         const result = await db.repairCar(numberPlate);
         res.json(result);
     } catch(err) {
+        console.log(err);
         res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
@@ -85,6 +89,7 @@ router.patch("/:numberPlate/retrieve", auth.requireAdminAuthentication, async (r
         const result = await db.retrieveCar(numberPlate);
         res.json(result);
     } catch(err) {
+        console.log(err);
         res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
@@ -98,6 +103,7 @@ router.get("/rents", auth.requireAdminAuthentication, async (req, res) => {
         const result = await db.getRentData();
         res.json(result);
     } catch(err) {
+        console.log(err);
         res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
@@ -115,6 +121,7 @@ router.patch("/return", auth.requireAdminAuthentication, async (req, res) => {
         const result = await db.returnCar(rentId, mileMeterEnd, gasConsumed, refundAmount);
         res.json(result);
     } catch(err) {
+        console.log(err);
         res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
@@ -129,6 +136,7 @@ router.post("/cars", auth.requireAdminAuthentication, async (req, res) => {
         const result = await db.insertCarModel(carname, price, baseamount, rupeeperkm, rupeeperhour, imagelink);
         res.json(result);
     } catch(err) {
+        console.log(err);
         res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
@@ -142,6 +150,7 @@ router.get("/cars", auth.requireAdminAuthentication, async (req, res) => {
         const result = await db.getCarModels();
         res.json(result);
     } catch(err) {
+        console.log(err);
         res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
@@ -156,6 +165,7 @@ router.delete("/cars", auth.requireAdminAuthentication, async (req, res) => {
         const result = await db.deleteCarItem(carId);
         res.json(result);
     } catch(err) {
+        console.log(err);
         res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
