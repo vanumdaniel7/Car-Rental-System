@@ -7,11 +7,12 @@ const client = new pg.Client(process.env.CONNECTION_STRING);
 const randomInRange = (start, end) => Math.floor(Math.random() * (end - start + 1) + start);
 
 module.exports = {
-    connect: () => {
+    connect: (app, PORT) => {
         client.connect(err => {
             if(err) {
                 return ;
             } else {
+                app.listen(PORT);
                 console.log("Connection to postgreSQL successful");
             }
         });
