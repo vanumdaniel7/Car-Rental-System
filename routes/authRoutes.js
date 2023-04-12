@@ -208,7 +208,7 @@ router.patch("/", auth.requireAuthentication, async (req, res) => {
 
 router.patch("/recharge", auth.requireAuthentication, async (req, res) => {
     try {
-        const { balance } = req.body;
+        let { balance } = req.body;
         balance = parseInt(balance);
         if(balance <= 0) {
             return res.json({
