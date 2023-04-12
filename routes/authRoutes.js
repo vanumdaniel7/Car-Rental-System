@@ -10,7 +10,6 @@ router.post("/", async (req, res) => {
         const result = await auth.createUser(req.body);
         res.json(result);
     } catch(err) {
-        console.log(err);
         res.json({
             info: "An unexpected error occured, please try again later", 
             status: "error", 
@@ -42,7 +41,6 @@ router.get("/verify/:token", async (req, res) => {
             res.json(result);
         });
     } catch(err) {
-        console.log(err);
         res.json({ 
             info: "An unexpected error occured, please try again later", 
             status: "error", 
@@ -64,7 +62,6 @@ router.post("/login", async (req, res) => {
         }
         res.json(result);
     } catch(err) {
-        console.log(err);
         res.json({ 
             info: "An unexpected error occured, please try again later", 
             status: "error", 
@@ -91,7 +88,6 @@ router.get("/resetemail", async (req, res) => {
             title: "Success" 
         }); 
     } catch(err) {
-        console.log(err);
         res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
@@ -124,7 +120,6 @@ router.patch("/:token/changepassword", async (req, res) => {
             res.status(200).json(result);
         });
     } catch(err) {
-        console.log(err);
         res.json({
             info: "An unexpected error occured, please try again later", 
             status: "error", 
@@ -138,7 +133,6 @@ router.get("/profile", auth.requireAuthentication, async (req, res) => {
         const result = await db.getUserProfile(res.locals.userid);
         res.json(result);
     } catch(err) {
-        console.log(err);
         res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
@@ -152,7 +146,6 @@ router.get("/rent", auth.requireAuthentication, async (req, res) => {
         const result = await db.getUserRentedCars(res.locals.userid);
         res.json(result);
     } catch(err) {
-        console.log(err);
         res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
@@ -166,7 +159,6 @@ router.get("/return", auth.requireAuthentication, async(req, res) => {
         const result = await db.getUserReturnedCars(res.locals.userid);
         res.json(result);
     } catch(err) {
-        console.log(err);
         res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
@@ -181,10 +173,22 @@ router.patch("/", auth.requireAuthentication, async (req, res) => {
         const { name, password } = req.query;
         const actualName = name.trim();
         const actualPassword = password.trim();
+        if(actualName === "") {
+            return res.json({
+                title: "Warning",
+                info: "Name cant be empty",
+                status: "warning"
+            });
+        } else if(actualPassword === "") {
+            return res.json({
+                title: "Warning",
+                info: "Password cant be empty",
+                status: "warning"
+            })
+        }
         const result = await db.updateUserDetails(userid, actualName, actualPassword);
         res.json(result);
     } catch(err) {
-        console.log(err);
         res.json({
             err:"An unexpected error occured, please try again later", 
             info: "error", 
@@ -196,10 +200,17 @@ router.patch("/", auth.requireAuthentication, async (req, res) => {
 router.patch("/recharge", auth.requireAuthentication, async (req, res) => {
     try {
         const { balance } = req.body;
+        balance = parseInt(balance);
+        if(balance <= 0) {
+            return res.json({
+                title: "Warning",
+                status: "warning",
+                info: "Cant add balance less than 1"
+            });
+        }
         const result = await db.updateBalance(res.locals.userid, balance);
         res.json(result);
     } catch(err) {
-        console.log(err);
         res.json({
             err:"An unexpected error occured, please try again later", 
             info: "error", 
