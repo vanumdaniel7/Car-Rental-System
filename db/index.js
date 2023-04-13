@@ -24,6 +24,7 @@ module.exports = {
                     balance bigserial not null
                 );`;
             await client.query(query);
+            await client.end();
         } catch(err) {
             throw err;
         }
@@ -41,6 +42,7 @@ module.exports = {
                     price integer not null
                 );`;
                 await client.query(query);
+                await client.end();
         } catch(err) {
             throw err;
         }
@@ -58,6 +60,7 @@ module.exports = {
                     constraint fk_car_id FOREIGN KEY(carId) REFERENCES cars(carId)
                 );`;
             await client.query(query);
+            await client.end();
         } catch(err) {
             throw err;
         }
@@ -77,6 +80,7 @@ module.exports = {
                     constraint fk_numberPlate_id_rent FOREIGN KEY(numberPlate) REFERENCES inventory(numberPlate)
                 );`;
             await client.query(query);
+            await client.end();
         } catch(err) {
             throw err;
         }
@@ -96,6 +100,7 @@ module.exports = {
                     constraint fk_numberPlate_return FOREIGN KEY(numberPlate) REFERENCES inventory(numberPlate)
                 );`;
             await client.query(query);
+            await client.end();
         } catch(err) {
             throw err;
         }
@@ -108,6 +113,7 @@ module.exports = {
             // await client.query(query1);
             await client.query(query2);
             await client.query(query3);
+            await client.end();
         } catch(err) {
             throw err;
         }
@@ -115,22 +121,27 @@ module.exports = {
     dropUserTable: async () => {
         const query = `DROP table users;`;
         await client.query(query);
+        await client.end();
     },
     dropCarTable: async () => {
         const query = `DROP table cars`;
         await client.query(query);
+        await client.end();
     },
     dropInventoryTable: async () => {
         const query = `DROP table inventory`;
         await client.query(query);
+        await client.end();
     },
     dropRentTable: async () => {
         const query = `DROP table rents;`;
         await client.query(query);
+        await client.end();
     },
     dropReturnTable: async () => {
         const query = `DROP table return;`;
         await client.query(query);
+        await client.end();
     },
     dropEnums: async () => {
         const query1 = `DROP TYPE carStatusEnum;`;
@@ -139,6 +150,7 @@ module.exports = {
         // await client.query(query1);
         // await client.query(query2);
         await client.query(query3);
+        await client.end();
     },
     deleteAllTables: async () => {
         const query = `
@@ -149,6 +161,7 @@ module.exports = {
             DELETE FROM return;
         `;
         await client.query(query);
+        await client.end();
     },
     createUser: async (email, hashedPassword, name) => {
         try {
@@ -156,12 +169,14 @@ module.exports = {
             const result1 = await client.query(query1);
             if(result1.rows.length === 1) {
                 if(result1.rows[0].isverified === true) {
+                    await client.end();
                     return { 
                         info: "Account with this email already exists, please try with another email", 
                         status: "info", 
                         title: "Account already exists" 
                     };
                 } else {
+                    await client.end();
                     await mailer.sendVerificationLink(result1.rows[0].id, result1.rows[0].email, result1.rows[0].name);
                     return { 
                         info: "Account with this email already exists, please click on the verification link sent to your email to continue login", 
@@ -176,6 +191,7 @@ module.exports = {
             const result3 = await client.query(query3);
             const userid = parseInt(result3.rows[0].userid);
             await mailer.sendVerificationLink(userid, email, name);
+            await client.end();
             return { 
                 info: "Account successfully created, please click on the verification link sent to your email to continue login", 
                 status: "success", 
@@ -190,10 +206,16 @@ module.exports = {
             const query1 = `SELECT * FROM users WHERE email = '${email}'`;
             const result1 = await client.query(query1);
             if(result1.rows[0].isverified === true) {
-                return { info: `Hi ${result1.rows[0].name}, you can now use your credentials to login`, status: "info", title: "Account already verified" };
+                await client.end();
+                return { 
+                    info: `Hi ${result1.rows[0].name}, you can now use your credentials to login`, 
+                    status: "info", 
+                    title: "Account already verified" 
+                };
             }
             const query2 = `UPDATE users SET isverified = true WHERE email = '${email}'`;
             await client.query(query2);
+            await client.end();
             return { 
                 info: `Hi ${result1.rows[0].name}, you can now use your credentials to login`, 
                 status: "info", 
@@ -208,6 +230,7 @@ module.exports = {
             const query = `SELECT * FROM users WHERE email = '${email}'`;
             const result = await client.query(query);
             if(result.rows.length === 0 || !await bcrypt.compare(password, result.rows[0].password)) {
+                await client.end();
                 return { 
                     info: "Invalid credentials", 
                     status: "error", 
@@ -215,6 +238,7 @@ module.exports = {
                 };
             } else if(result.rows[0].isverified === false) {
                 await mailer.sendVerificationLink(result.rows[0].id, result.rows[0].email, result.rows[0].name);
+                await client.end();
                 return { 
                     info: "User is not verified, but dont worry we have sent you a verification mail to your email", 
                     status: "warning", 
@@ -223,6 +247,7 @@ module.exports = {
             }
             result.rows[0].datejoined = new Date(parseInt(result.rows[0].datejoined));
             result.rows[0].datejoined = result.rows[0].datejoined.toLocaleDateString("en-AU");
+            await client.end();
             return { 
                 info: "Login Successful", 
                 status: "success", 
@@ -238,12 +263,14 @@ module.exports = {
             const query = `SELECT * FROM users WHERE email = '${email}'`;
             const result = await client.query(query);
             if(result.rows[0] == undefined) {
+                await client.end();
                 return { 
                     userid: null, 
                     email: null
                 };
             }
-        return result.rows[0];
+            await client.end();
+            return result.rows[0];
         } catch(err) {
             throw err;
         }
@@ -253,6 +280,7 @@ module.exports = {
             const hashedPassword = await bcrypt.hash(password, 12);
             const query = `UPDATE users SET password = '${hashedPassword}' WHERE userid = ${userid}`;
             await client.query(query);
+            await client.end();
             return { 
                 info: "Password reset successful", 
                 status: "success", 
@@ -316,6 +344,7 @@ module.exports = {
             } else {
                 result = [...result1.rows, ...result2.rows];
             }
+            await client.end();
             return {
                 status: "success",
                 title: "Success",
@@ -346,6 +375,7 @@ module.exports = {
             ;`;
             const result1 = await client.query(query1);
             if(result1.rows.length === 0) {
+                await client.end();
                 return {
                     status: "info",
                     title: "Info",
@@ -355,6 +385,7 @@ module.exports = {
             const query2 = `SELECT balance FROM users WHERE userId = ${userid};`;
             const result2 = await client.query(query2);
             if(parseInt(result2.rows[0].balance) < Math.floor(carType === "AC" ? parseInt(result1.rows[0].baseamount) * 1.5 : parseInt(result1.rows[0].baseamount))) {
+                await client.end();
                 return {
                     status: "warning",
                     title: "warning",
@@ -367,6 +398,7 @@ module.exports = {
             await client.query(query4);
             const query5 = `INSERT INTO RENTS(userid, numberPlate, expectedReturn, mileMeterStart, rentedOn, rentStatus) VALUES (${userid}, '${result1.rows[0].numberplate}', '${expectedReturn}', ${result1.rows[0].milemeterstart}, '${Date.now()}', 'active');`;
             await client.query(query5);
+            await client.end();
             return {
                 status: "success",
                 info: "Car Successfully rented",
@@ -398,6 +430,7 @@ module.exports = {
                         row.rupeeperhour = 1.5 * parseInt(row.rupeeperhour);
                     }
                 }
+                await client.end();
                 return {
                     status: "success",
                     title: "Success",
@@ -435,6 +468,7 @@ module.exports = {
                     row.rupeeperhour = 1.5 * parseInt(row.rupeeperhour);
                 }
             }
+            await client.end();
             return {
                 status: "success",
                 title: "Success",
@@ -494,6 +528,7 @@ module.exports = {
                 }
                 item1.demand |= 0;
             }
+            await client.end();
             return {
                 status: "success",
                 info: "Inventory successfully fetched",
@@ -519,6 +554,7 @@ module.exports = {
             const result5 = await client.query(query5);
             const price = parseInt(result5.rows[0].price);
             const returnMoney = randomInRange(Math.floor(price / 2), price);
+            await client.end();
             return {
                 status: "success",
                 info: `Car condemned and sold off successfully and got ${returnMoney} in return`,
@@ -532,6 +568,7 @@ module.exports = {
         try {
             const query = `UPDATE inventory SET carStatus = 'repaired' WHERE numberPlate = '${numberPlate}';`;
             await client.query(query);
+            await client.end();
             return {
                 status: "success",
                 info: "Car Successfully sent to repair",
@@ -565,6 +602,7 @@ module.exports = {
                     numberPlate = '${numberPlate}'
                 ;`;
             const result2 = await client.query(query2);
+            await client.end();
             return {
                 status: "success",
                 info: `Car successfully repaired, cost occured: ${cost}`,
@@ -579,6 +617,7 @@ module.exports = {
         try {
             const query = `SELECT carId, carname FROM cars;`;
             const result = await client.query(query);
+            await client.end();
             return {
                 status: "success",
                 title: "Success",
@@ -596,6 +635,7 @@ module.exports = {
                             VALUES (${carId}, '${numberPlate}', '${carType}', 'available', ${mileMeterReading}, 0)
                         ;`;
             await client.query(query);
+            await client.end();
             return {
                 status: "success",
                 title: "Success",
@@ -609,6 +649,7 @@ module.exports = {
         try {
             const query = `UPDATE rents SET rentStatus = 'requestedToReturn' WHERE rentId = ${rentId};`;
             await client.query(query);
+            await client.end();
             return {
                 status: "info",
                 title: "Info",
@@ -624,6 +665,7 @@ module.exports = {
             const result = await client.query(query);
             result.rows[0].datejoined = new Date(parseInt(result.rows[0].datejoined));
             result.rows[0].datejoined = result.rows[0].datejoined.toLocaleDateString("en-AU");
+            await client.end();
             return {
                 status: "success",
                 title: "Success",
@@ -647,6 +689,7 @@ module.exports = {
             query = `UPDATE users SET password = '${hashedPassword}' WHERE userid = ${userid}`;
         }
         client.query(query);
+        await client.end();
         return { 
             info: "User details successfully updated", 
             status: "success", 
@@ -695,6 +738,7 @@ module.exports = {
                 item.returnedon = new Date(parseInt(item.returnedon));
                 item.returnedon = item.returnedon.toLocaleDateString("en-AU");
             }
+            await client.end();
             return {
                 status: "success",
                 title: "Success",
@@ -736,6 +780,7 @@ module.exports = {
             const query5 = `SELECT * FROM users WHERE userid = ${userid};`;
             const result5 = await client.query(query5);
             if(parseInt(result5.rows[0].balance) < roamingCost - refundAmount) {
+                await client.end();
                 return {
                     status: "warning",
                     title: "warning",
@@ -748,6 +793,7 @@ module.exports = {
             await client.query(query6);
             const query7 = `UPDATE users SET balance = balance + ${refundAmount} - ${roamingCost} WHERE userid = ${userid};`;
             await client.query(query7);
+            await client.end();
             return {
                 status: "success",
                 title: "Success",
@@ -788,6 +834,7 @@ module.exports = {
                 car.numberofrents |= 0;
                 car.demand = (totalNumberOfRents === 0 ? 0 : (parseInt(car.numberofrents) * 100 / totalNumberOfRents).toFixed(2));
             }
+            await client.end();
             return {
                 status: "success",
                 title: "Success",
@@ -804,6 +851,7 @@ module.exports = {
                                 cars(carName, rupeePerKm, rupeePerHour, baseAmount, price, imageLink)
                             VALUES ('${carName}', ${rupeePerKm}, ${rupeePerHour}, ${baseAmount}, ${price}, '${imageLink}');`;
             await client.query(query);
+            await client.end();
             return {
                 status: "success",
                 title: "Success",
@@ -830,6 +878,7 @@ module.exports = {
             const result1 = await client.query(query1);
             const numberOfActiveRents = parseInt(result1.rows[0].numberofactiverents);
             if(numberOfActiveRents > 0) {
+                await client.end();
                 return {
                     status: "warning",
                     title: "Warning",
@@ -840,6 +889,7 @@ module.exports = {
             const result2 = await client.query(query2);
             const numberOfInventory = parseInt(result2.rows[0].numberofinventory);
             if(numberOfInventory > 0) {
+                await client.end();
                 return {
                     status: "warning",
                     title: "Warning",
@@ -880,6 +930,7 @@ module.exports = {
             await client.query(query5);
             const query6 = `DELETE FROM cars WHERE carId = ${carId};`;
             await client.query(query6);
+            await client.end();
             return {
                 status: "success",
                 title: "Success",
@@ -893,6 +944,7 @@ module.exports = {
         try {
             const query = `UPDATE users SET balance = balance + ${balance} WHERE userId = ${userid};`;
             await client.query(query);
+            await client.end();
             return {
                 title: "Success",
                 status: "success",
