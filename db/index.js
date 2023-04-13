@@ -7,14 +7,9 @@ const client = new pg.Client(process.env.CONNECTION_STRING);
 const randomInRange = (start, end) => Math.floor(Math.random() * (end - start + 1) + start);
 
 module.exports = {
-    connect: () => {
-        client.connect(err => {
-            if(err) {
-                return ;
-            } else {
-                console.log("Connection to postgreSQL successful");
-            }
-        });
+    connect: async () => {
+        const result = await client.connect();
+        return result;
     },
     createUserTable: async () => {
         try {
