@@ -13,4 +13,4 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/cars", carRoutes);
 app.use(express.static(path.join(__dirname, "./client/build/")));
 app.get("*", (req, res) => { res.sendFile(path.join(__dirname, "./client/build/index.html"))});
-db.connect().then(() => { app.listen(PORT) });
+db.connect().then(() => { app.listen(PORT); });
