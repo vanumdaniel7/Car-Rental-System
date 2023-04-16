@@ -11,9 +11,9 @@ const startApp = async () => {
     app.listen(3000);
 }
 app.use(express.json());
-app.use("/admin", adminRoutes);
-app.use("/auth", authRoutes);
-app.use("/cars", carRoutes);
+app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/cars", carRoutes);
 app.use(express.static(path.join(__dirname, "./client/build/")));
 app.get("*", (req, res) => { res.sendFile(path.join(__dirname, "./client/build/index.html"))});
 startApp();
