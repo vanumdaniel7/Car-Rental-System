@@ -10,6 +10,55 @@ router.post("/", async (req, res) => {
         const result = await auth.createUser(req.body);
         res.json(result);
     } catch(err) {
+        res.json({
+            info: "An unexpected error occured, please try again later", 
+            status: "error", 
+            title: "Error" 
+        });
+    }
+});
+
+
+router.get("/rent", auth.requireAuthentication, async (req, res) => {
+    try {
+        const result = await db.getUserRentedCars(res.locals.userid);
+        res.json(result);
+    } catch(err) {
+        res.json({ 
+            info :"An unexpected error occured, please try again later", 
+            status: "error", 
+            title: "Error" 
+        });
+    }
+});
+
+router.get("/return", auth.requireAuthentication, async(req, res) => {
+    try {
+        const result = await db.getUserReturnedCars(res.locals.userid);
+        res.json(result);
+    } catch(err) {
+        res.json({ 
+            info :"An unexpected error occured, please try again later", 
+            status: "error", 
+            title: "Error" 
+        });
+    }
+});
+
+router.get("/", auth.requireAuthentication, async (req, res) => {
+    try {
+        const result1 = await db.getUserProfile(res.locals.userid);
+        const result2 = await db.getUserRentedCars(res.locals.userid);
+        const result3 = await db.getUserReturnedCars(res.locals.userid);
+        res.json({
+            status: "success",
+            title: "Success",
+            info: "User profile fetched successfully",
+            profile: result1.data,
+            rented: result2.data,
+            returned: result3.data
+        });
+    } catch(err) {
         console.log(err);
         res.json({
             info: "An unexpected error occured, please try again later", 
@@ -25,13 +74,13 @@ router.get("/verify/:token", async (req, res) => {
         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decoded) => {
             if(err) {
                 if(err.name === "TokenExpiredError") {
-                    return res.status(200).json({
+                    return res.json({
                         status: "error",
                         title: "Expired link",
                         info: "Verification link expired, request another verfication link from the login page"
                     });
                 } else if(err.name === "JsonWebTokenError") {
-                    return res.status(200).json({
+                    return res.json({
                         status: "error",
                         title: "Invalid verification link",
                         info: "The verification url is not valid, request another verfication link from the login page"
@@ -40,9 +89,9 @@ router.get("/verify/:token", async (req, res) => {
             }
             const result = await auth.verifyUser(decoded.data.email);
             res.json(result);
+
         });
     } catch(err) {
-        console.log(err);
         res.json({ 
             info: "An unexpected error occured, please try again later", 
             status: "error", 
@@ -64,7 +113,6 @@ router.post("/login", async (req, res) => {
         }
         res.json(result);
     } catch(err) {
-        console.log(err);
         res.json({ 
             info: "An unexpected error occured, please try again later", 
             status: "error", 
@@ -91,7 +139,6 @@ router.get("/resetemail", async (req, res) => {
             title: "Success" 
         }); 
     } catch(err) {
-        console.log(err);
         res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
@@ -106,13 +153,13 @@ router.patch("/:token/changepassword", async (req, res) => {
         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decoded) => {
             if(err) {
                 if(err.name === "TokenExpiredError") {
-                    return res.status(200).json({
+                    return res.json({
                         status: "error",
                         title: "Expired link",
                         info: "Verification link expired, request another verfication link from the login page"
                     });
                 } else if(err.name === "JsonWebTokenError") {
-                    return res.status(200).json({
+                    return res.json({
                         status: "error",
                         title: "Invalid verification link",
                         info: "The verification url is not valid, request another verfication link from the login page"
@@ -121,54 +168,12 @@ router.patch("/:token/changepassword", async (req, res) => {
             }
             const { password } = req.query;
             const result = await db.changeUserPassword(decoded.data.userid, password);
-            res.status(200).json(result);
+            res.json(result);
+
         });
     } catch(err) {
-        console.log(err);
         res.json({
             info: "An unexpected error occured, please try again later", 
-            status: "error", 
-            title: "Error" 
-        });
-    }
-});
-
-router.get("/profile", auth.requireAuthentication, async (req, res) => {
-    try {
-        const result = await db.getUserProfile(res.locals.userid);
-        res.json(result);
-    } catch(err) {
-        console.log(err);
-        res.json({ 
-            info :"An unexpected error occured, please try again later", 
-            status: "error", 
-            title: "Error" 
-        });
-    }
-});
-
-router.get("/rent", auth.requireAuthentication, async (req, res) => {
-    try {
-        const result = await db.getUserRentedCars(res.locals.userid);
-        res.json(result);
-    } catch(err) {
-        console.log(err);
-        res.json({ 
-            info :"An unexpected error occured, please try again later", 
-            status: "error", 
-            title: "Error" 
-        });
-    }
-});
-
-router.get("/return", auth.requireAuthentication, async(req, res) => {
-    try {
-        const result = await db.getUserReturnedCars(res.locals.userid);
-        res.json(result);
-    } catch(err) {
-        console.log(err);
-        res.json({ 
-            info :"An unexpected error occured, please try again later", 
             status: "error", 
             title: "Error" 
         });
@@ -197,7 +202,6 @@ router.patch("/", auth.requireAuthentication, async (req, res) => {
         const result = await db.updateUserDetails(userid, actualName, actualPassword);
         res.json(result);
     } catch(err) {
-        console.log(err);
         res.json({
             err:"An unexpected error occured, please try again later", 
             info: "error", 

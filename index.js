@@ -5,12 +5,15 @@ const adminRoutes = require("./routes/adminRoutes.js");
 const authRoutes = require("./routes/authRoutes.js");
 const carRoutes = require("./routes/carRoutes.js");
 const app = express();
-const PORT = 3000;
 
+const startApp = async () => {
+    await db.connect();
+    app.listen(3000);
+}
 app.use(express.json());
-app.use("/api/v1/admin", adminRoutes);
-app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/cars", carRoutes);
+app.use("/admin", adminRoutes);
+app.use("/auth", authRoutes);
+app.use("/cars", carRoutes);
 app.use(express.static(path.join(__dirname, "./client/build/")));
 app.get("*", (req, res) => { res.sendFile(path.join(__dirname, "./client/build/index.html"))});
-db.connect().then(() => { app.listen(PORT); });
+startApp();

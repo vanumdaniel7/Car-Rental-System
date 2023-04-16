@@ -63,7 +63,6 @@ router.post("/rent", auth.requireAuthentication, async (req, res) => {
         const result = await db.rentCar(carId, modifiedExpectedReturn, res.locals.userid, carType);
         res.json(result);
     } catch(err) {
-        console.log(err);
         res.json({
             info: "An unexpected error occured, please try again later", 
             status: "error", 
@@ -77,7 +76,6 @@ router.get("/models", auth.requireAdminAuthentication, async (req, res) => {
         const result = await db.getCarModels();
         res.json(result);
     } catch(err) {
-        console.log(err);
         res.json({
             info: "An unexpected error occured, please try again later", 
             status: "error", 

@@ -38,20 +38,6 @@ router.post("/login", async (req, res) => {
     }
 });
 
-router.get("/inventory", auth.requireAdminAuthentication, async (req, res) => {
-    try {
-        const { availablity } = req.query;
-        const result = await db.getCarData(availablity);
-        res.json(result);
-    } catch(err) {
-        console.log(err);
-        res.json({ 
-            info :"An unexpected error occured, please try again later", 
-            status: "error", 
-            title: "Error" 
-        });
-    }
-});
 
 router.delete("/:numberPlate/sell", auth.requireAdminAuthentication, async (req, res) => {
     try {
@@ -60,7 +46,7 @@ router.delete("/:numberPlate/sell", auth.requireAdminAuthentication, async (req,
         res.json(result);
     } catch(err) {
         console.log(err);
-        res.json({
+        res.json({ 
             info :"An unexpected error occured, please try again later", 
             status: "error", 
             title: "Error" 
@@ -87,20 +73,6 @@ router.patch("/:numberPlate/retrieve", auth.requireAdminAuthentication, async (r
     try {
         const { numberPlate } = req.params;
         const result = await db.retrieveCar(numberPlate);
-        res.json(result);
-    } catch(err) {
-        console.log(err);
-        res.json({ 
-            info :"An unexpected error occured, please try again later", 
-            status: "error", 
-            title: "Error" 
-        });
-    }
-});
-
-router.get("/rents", auth.requireAdminAuthentication, async (req, res) => {
-    try {
-        const result = await db.getRentData();
         res.json(result);
     } catch(err) {
         console.log(err);
@@ -201,9 +173,10 @@ router.post("/cars", auth.requireAdminAuthentication, async (req, res) => {
     }
 });
 
-router.get("/cars", auth.requireAdminAuthentication, async (req, res) => {
+router.delete("/cars", auth.requireAdminAuthentication, async (req, res) => {
     try {
-        const result = await db.getCarModels();
+        const { carId } = req.body;
+        const result = await db.deleteCarItem(carId);
         res.json(result);
     } catch(err) {
         console.log(err);
@@ -215,11 +188,20 @@ router.get("/cars", auth.requireAdminAuthentication, async (req, res) => {
     }
 });
 
-router.delete("/cars", auth.requireAdminAuthentication, async (req, res) => {
+router.get("/", async (req, res) => {
     try {
-        const { carId } = req.body;
-        const result = await db.deleteCarItem(carId);
-        res.json(result);
+        const availablity = "";
+        const result1 = await db.getCarData(availablity);
+        const result2 = await db.getRentData();
+        const result3 = await db.getCarModels();
+        res.json({
+            title: "Success",
+            info: "Admin data fetched successfully",
+            status: "success",
+            inventory: result1.data,
+            rents: result2.data,
+            models: result3.data,
+        });
     } catch(err) {
         console.log(err);
         res.json({ 
